@@ -18,9 +18,10 @@ def createPoints(inshp, outshp, mini_dist):
         output: the result point feature class
         mini_dist: the minimum distance between two created point
 
-    last modified by Xiaojiang Li, MIT Senseable City Lab
-
     '''
+    import warnings
+    # Annoying library warning
+    warnings.simplefilter(action='ignore', category=FutureWarning)
 
     import fiona
     import os,os.path
@@ -66,12 +67,10 @@ def createPoints(inshp, outshp, mini_dist):
     }
 
     # Create pointS along the streets
-    with fiona.drivers():
-        #with fiona.open(outshp, 'w', 'ESRI Shapefile', crs=source.crs, schema) as output:
+    with fiona.Env():
         with fiona.open(outshp, 'w', crs = from_epsg(4326), driver = 'ESRI Shapefile', schema = schema) as output:
             for line in fiona.open(temp_cleanedStreetmap):
                 first = shape(line['geometry'])
-
                 length = first.length
 
                 try:
@@ -88,9 +87,11 @@ def createPoints(inshp, outshp, mini_dist):
                         project2 = partial(pyproj.transform,pyproj.Proj(init='EPSG:3857'),pyproj.Proj(init='EPSG:4326'))
                         point = transform(project2, point)
                         output.write({'geometry':mapping(point),'properties': {'id':1}})
+                except (KeyboardInterrupt, SystemExit):
+                    raise
                 except:
-                    print ("You should make sure the input shapefile is WGS84")
-                    return
+                    print("You should make sure the input shapefile is WGS84")
+                    print(sys.exc_info())
 
     print("Process Complete")
 
@@ -106,7 +107,8 @@ if __name__ == "__main__":
     import sys
 
     root = '../spatial-data'
-    inshp = os.path.join(root,'CambridgeStreet_wgs84.shp')
-    outshp = os.path.join(root,'Cambridge20m.shp')
-    mini_dist = 20 #the minimum distance between two generated points in meter
+    inshp = os.path.join(root,'smaller_ex_planet_osm_line_lines.shp')
+    outshp = os.path.join(root,'GLSG_small_out.shp')
+    mini_dist = 50 #the minimum distance between two generated points in meter
+
     createPoints(inshp, outshp, mini_dist)
