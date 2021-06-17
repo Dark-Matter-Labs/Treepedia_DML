@@ -2,8 +2,18 @@
 # This function is used to collect the metadata of the GSV panoramas based on the sample point shapefile
 
 # Copyright(C) Xiaojiang Li, Ian Seiferling, Marwa Abdulhai, Senseable City Lab, MIT
+import urllib.request, urllib.parse, urllib.error,urllib.request,urllib.error,urllib.parse
+import io
+import math
+from osgeo import ogr, osr
+import time
+import os,os.path
+import json
+import streetview
+import time
+from datetime import datetime
 
-def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder):
+def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder, greenmonth):
     '''
     This function is used to call the Google API url to collect the metadata of
     Google Street View Panoramas. The input of the function is the shpfile of the create sample site, the output
@@ -16,15 +26,7 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder):
 
     '''
 
-    import urllib.request, urllib.parse, urllib.error,urllib.request,urllib.error,urllib.parse
-    import xmltodict
-    import io
-    import math
-    from osgeo import ogr, osr
-    import time
-    import os,os.path
-    import json
-    import streetview
+
 
     if not os.path.exists(ouputTextFolder):
         os.makedirs(ouputTextFolder)
@@ -87,13 +89,19 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder):
                 metaDatajson = urllib.request.urlopen(urlAddress)
                 metaData = metaDatajson.read()
                 data = json.loads(metaData)
-                #print(data)
+                print(data)
 
                 # in case there is not panorama in the site, continue
                 if data['status'] != 'OK':
                     continue
                 else:
                     panoDate, panoId, panoLat, panoLon = getPanoItems(data)
+
+                    # Check if the Pano corresponds to the right time of year
+                    if check_pano_month_in_greenmonth(panoDate, greenmonth) is False:
+                        panoLst = streetview.panoids(lon=lon, lat=lat)
+                        sorted_panoList = sort_pano_list_by_date(panoLst)
+                        panoDate, panoId, panoLat, panoLon = get_next_pano_in_greenmonth(sorted_panoList, greenmonth)
 
                     print(('The coordinate (%s,%s), panoId is: %s, panoDate is: %s'%(panoLon, panoLat, panoId, panoDate)))
                     lineTxt = 'panoID: %s panoDate: %s longitude: %s latitude: %s\n'%(panoId, panoDate, panoLon, panoLat)
@@ -107,6 +115,47 @@ def getPanoItems(data):
     panoId = data['pano_id']
     panoLat = data['location']['lat']
     panoLon = data['location']['lng']
+    return panoDate, panoId, panoLat, panoLon
+
+def check_pano_month_in_greenmonth(panoDate, greenmonth):
+    month = panoDate[-2:]
+    return month in greenmonth
+
+def sort_pano_list_by_date(panoLst):
+    def func(x):
+    # Classify the pano list from closest to farthest in time
+        if 'year'in x:
+            return datetime(year=x['year'], month=x['month'], day=1)
+        else:
+            return datetime(year=1, month=1, day=1)
+    panoLst.sort(key=func, reverse=True)
+    return panoLst
+
+def get_next_pano_in_greenmonth(panoLst, greenmonth):
+    greenmonth_int = [int(month) for month in greenmonth]
+
+    for pano in panoLst:
+        if 'month' not in pano.keys():
+            continue
+        month = pano['month']
+        pano_year = pano['year']
+        if month in greenmonth_int:
+            return get_pano_items_from_dict(pano)
+
+    print(f"No pano with greenmonth {greenmonth} found. ")
+    #if year != "":
+    #    print(f"No pano with year {year} found. ")
+    print("Returning info of latest pano")
+    return get_pano_items_from_dict(panoLst[0])
+
+def get_pano_date_str(panoMonth, panoYear):
+    return str(panoYear) + '-' + str(panoMonth).zfill(2)
+
+def get_pano_items_from_dict(pano):
+    panoDate = get_pano_date_str(pano['month'], pano['year'])
+    panoId = pano['panoid']
+    panoLat = pano['lat']
+    panoLon = pano['lon']
     return panoDate, panoId, panoLat, panoLon
 
 def get_keys():
@@ -132,4 +181,7 @@ if __name__ == "__main__":
     inputShp = os.path.join(root,'GLSG_small_out.shp')
     outputTxt = root
 
-    GSVpanoMetadataCollector(inputShp,1000,outputTxt)
+    # Add the Green Months
+    greenmonth = ['04','05','06','07','08','09']
+
+    GSVpanoMetadataCollector(inputShp,1000,outputTxt, greenmonth)
