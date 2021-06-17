@@ -89,7 +89,7 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder, greenmonth
                 metaDatajson = urllib.request.urlopen(urlAddress)
                 metaData = metaDatajson.read()
                 data = json.loads(metaData)
-                print(data)
+                #print(data)
 
                 # in case there is not panorama in the site, continue
                 if data['status'] != 'OK':
@@ -101,7 +101,11 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder, greenmonth
                     if check_pano_month_in_greenmonth(panoDate, greenmonth) is False:
                         panoLst = streetview.panoids(lon=lon, lat=lat)
                         sorted_panoList = sort_pano_list_by_date(panoLst)
-                        panoDate, panoId, panoLat, panoLon = get_next_pano_in_greenmonth(sorted_panoList, greenmonth)
+                        if not sorted_panoList:
+                            print(" No alternative panorama found ")
+                            continue
+                        else:
+                            panoDate, panoId, panoLat, panoLon = get_next_pano_in_greenmonth(sorted_panoList, greenmonth)
 
                     print(('The coordinate (%s,%s), panoId is: %s, panoDate is: %s'%(panoLon, panoLat, panoId, panoDate)))
                     lineTxt = 'panoID: %s panoDate: %s longitude: %s latitude: %s\n'%(panoId, panoDate, panoLon, panoLat)
@@ -134,6 +138,8 @@ def sort_pano_list_by_date(panoLst):
 def get_next_pano_in_greenmonth(panoLst, greenmonth):
     greenmonth_int = [int(month) for month in greenmonth]
 
+
+
     for pano in panoLst:
         if 'month' not in pano.keys():
             continue
@@ -143,9 +149,8 @@ def get_next_pano_in_greenmonth(panoLst, greenmonth):
             return get_pano_items_from_dict(pano)
 
     print(f"No pano with greenmonth {greenmonth} found. ")
-    #if year != "":
-    #    print(f"No pano with year {year} found. ")
     print("Returning info of latest pano")
+    print("Numbers of available panoramas:",len(panoLst))
     return get_pano_items_from_dict(panoLst[0])
 
 def get_pano_date_str(panoMonth, panoYear):
