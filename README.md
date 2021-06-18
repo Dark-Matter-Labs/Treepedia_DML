@@ -1,3 +1,39 @@
+# DML
+
+This projects intent is to use the TreePedia methodology for the city of Glasgow. 
+
+Most of the original code has been updated to work in python 3.X based on the previous work of https://github.com/y26805/Treepedia_Public
+
+## Google Street View Keys
+
+A functioning Google Cloud Services key is needed to retreive the Google Street View images. Therefore, make sure you have a working account with a billings account associated with the 'google street view API' enabled.
+Please make sure that the keys that you are using are and stay private. A `keys.txt` file is created for that purpose. 
+
+
+## Dependencies
+
+```# required for Matplotlib
+brew install pkg-config freetype 
+
+# required for Fiona
+brew install gdal 
+pip3 install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
+
+# install dependency of PyMeanShift
+pip3 install numpy==1.18.3
+
+# download PyMeanShift (not available on PIP) and install
+git clone https://github.com/fjean/pymeanshift.git
+cd pymeanshift
+sudo python setup.py install
+cd ../
+
+# clone Treepedia repository and install remaining dependencies using pip
+git clone https://github.com/y26805/Treepedia_Public.git
+cd Treepedia_Public
+pip3 install -r requirements.txt 
+```
+
 # Treepedia
 Developed by the MIT [Senseable City Lab](https://senseable.mit.edu/), *Treepedia* aims to raise a proactive awareness of urban vegetation improvement, using computer vision techniques applied to Google Street View images. Our focus is on street trees: Treepedia doesn't map parks, as GSV doesn't venture into them as it does on average streets.
 
