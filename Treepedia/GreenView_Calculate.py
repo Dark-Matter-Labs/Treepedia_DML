@@ -159,7 +159,7 @@ def VegetationClassification(Img):
 
 # using 18 directions is too time consuming, therefore, here I only use 6 horizontal directions
 # Each time the function will read a text, with 1000 records, and save the result as a single TXT
-def GreenViewComputing_ogr_6Horizon(GSVinfoFolder, outTXTRoot, greenmonth, key_file):
+def GreenViewComputing_ogr_6Horizon(GSVinfoFolder, outTXTRoot, greenmonth):
 
     """
     This function is used to download the GSV from the information provide
@@ -178,14 +178,6 @@ def GreenViewComputing_ogr_6Horizon(GSVinfoFolder, outTXTRoot, greenmonth, key_f
 
 
     # read the Google Street View API key files, you can also replace these keys by your own
-    lines = open(key_file,"r")
-    keylist = []
-    for line in lines:
-        key = line.rstrip()
-        keylist.append(key)
-    lines.close()
-
-    print ('The key list is:=============', keylist)
 
     # set a series of heading angle
     headingArr = 360/6*np.array([0,1,2,3,4,5])
@@ -231,8 +223,9 @@ def GreenViewComputing_ogr_6Horizon(GSVinfoFolder, outTXTRoot, greenmonth, key_f
                     lon = panoLonLst[i]
 
                     # get a different key from the key list each time
-                    idx = i % len(keylist)
-                    key = keylist[idx]
+                    # idx = i % len(keylist)
+                    # key = keylist[idx]
+                    key = config.gcloud_key
 
                     # calculate the green view index
                     greenPercent = 0.0
@@ -243,11 +236,11 @@ def GreenViewComputing_ogr_6Horizon(GSVinfoFolder, outTXTRoot, greenmonth, key_f
                         # using different keys for different process, each key can only request 25,000 imgs every 24 hours
                         URL = get_api_url(panoID, heading, pitch, key)
                         # let the code to pause by 1s, in order to not go over data limitation of Google quota
-                        time.sleep(1)
+                        time.sleep(0.01)
 
                         # classify the GSV images and calcuate the GVI
                         try:
-                            im = get_api_image(URL)
+                            im = get_api_image(URL,panoID, heading)
                             percent = VegetationClassification(im)
                             greenPercent = greenPercent + percent
 
@@ -281,10 +274,16 @@ def get_api_url(panoID, heading, pitch, key):
     return URL
 
 
-def get_api_image(url):
+def get_api_image(url, panoID, heading):
     response = requests.get(url, stream=True)
-    im = np.array(Image.open(response.raw))
-    return im
+    image = Image.open(response.raw)
+
+    # Saving the images to a local path
+    path = config.GVIfile['images'] + str(panoID) + '_' + str(heading) + '.jpg'
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    image.save(path)
+
+    return np.array(image)
 
 
 def get_pano_lists_from_file(txtfilename, greenmonth):
@@ -329,14 +328,12 @@ def get_pano_lists_from_file(txtfilename, greenmonth):
 if __name__ == "__main__":
 
     import os,os.path
+    import config
 
-    os.chdir("../spatial-data")
+    os.chdir(config.root_dir)
     root = os.getcwd()
-    GSVinfoRoot = os.path.join(root, "metadata")
-    outputTextPath = os.path.join(root, "greenViewRes")
-    greenmonth = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    GSVinfoRoot = os.path.join(root, "")
+    outputTextPath = os.path.join(root, config.GVIfile['data'])
+    greenmonth = config.greenmonth
 
-    os.chdir("../")
-    key_file = os.path.join(os.getcwd(), 'keys.txt')
-
-    GreenViewComputing_ogr_6Horizon(GSVinfoRoot,outputTextPath, greenmonth, key_file)
+    GreenViewComputing_ogr_6Horizon(GSVinfoRoot,outputTextPath, greenmonth)

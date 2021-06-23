@@ -65,7 +65,7 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder, greenmonth
         if os.path.exists(ouputGSVinfoFile):
             continue
 
-        time.sleep(1)
+        time.sleep(0.1)
 
         key = get_keys()  #Input Your Key here
 
@@ -89,7 +89,7 @@ def GSVpanoMetadataCollector(samplesFeatureClass,num,ouputTextFolder, greenmonth
                 metaDatajson = urllib.request.urlopen(urlAddress)
                 metaData = metaDatajson.read()
                 data = json.loads(metaData)
-                #print(data)
+                print(data)
 
                 # in case there is not panorama in the site, continue
                 if data['status'] != 'OK':
@@ -164,29 +164,19 @@ def get_pano_items_from_dict(pano):
     return panoDate, panoId, panoLat, panoLon
 
 def get_keys():
-    # Function to get the keys from main keys file
-    os.chdir("./")
-    key_file = os.path.join(os.getcwd(), 'keys.txt')
 
-    lines = open(key_file,"r")
-    keylist = []
-    for line in lines:
-        key = line.rstrip()
-        keylist.append(key)
-    lines.close()
-
-    #print ('The key list is:=============', keylist)
-    return keylist[0]
+    return config.gcloud_key
 
 # ------------Main Function -------------------
 if __name__ == "__main__":
     import os, os.path
+    import config
 
-    root = '../spatial-data'
-    inputShp = os.path.join(root,'GLSG_small_out.shp')
+    root = config.root_dir
+    inputShp = os.path.join(root,config.shapefile['dotted'])
     outputTxt = root
 
     # Add the Green Months
-    greenmonth = ['04','05','06','07','08','09']
+    greenmonth = config.greenmonth
 
     GSVpanoMetadataCollector(inputShp,1000,outputTxt, greenmonth)

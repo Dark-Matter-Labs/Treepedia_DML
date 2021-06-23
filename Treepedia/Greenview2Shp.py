@@ -203,12 +203,13 @@ def CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList
 ## ----------------- Main function ------------------------
 if __name__ == "__main__":
     import os
+    import config
 
-    os.chdir("../spatial-data")
+    os.chdir(config.root_dir)
     root = os.getcwd()
 
-    inputGVIres = os.path.join(root, "greenViewRes")
-    outputShapefile = os.path.join(root, "GreenViewRes.shp")
+    inputGVIres = os.path.join(root, config.GVIfile['data'])
+    outputShapefile = os.path.join(root, config.GVIfile['shapefile'])
     lyrname = 'greenView'
     [panoIDlist,panoDateList,LonLst,LatLst,greenViewList] = Read_GVI_res(inputGVIres)
     print ('The length of the panoIDList is:', len(panoIDlist))

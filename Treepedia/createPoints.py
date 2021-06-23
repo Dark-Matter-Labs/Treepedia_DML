@@ -105,10 +105,11 @@ def createPoints(inshp, outshp, mini_dist):
 if __name__ == "__main__":
     import os,os.path
     import sys
+    import config
 
-    root = '../spatial-data'
-    inshp = os.path.join(root,'smaller_ex_planet_osm_line_lines.shp')
-    outshp = os.path.join(root,'GLSG_small_out.shp')
-    mini_dist = 50 #the minimum distance between two generated points in meter
+    root = config.root_dir
+    inshp = os.path.join(root,config.shapefile['input'])
+    outshp = os.path.join(root,config.shapefile['dotted'])
+    mini_dist = config.POINT_DIST #the minimum distance between two generated points in meter
 
     createPoints(inshp, outshp, mini_dist)
