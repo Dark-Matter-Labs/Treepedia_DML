@@ -1,6 +1,7 @@
 # Keys file
 *keys.txt
 spatial*
+*config.py
 
 # Distribution / packaging
 .Python
