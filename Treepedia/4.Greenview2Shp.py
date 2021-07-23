@@ -1,6 +1,7 @@
 # This script is used to convert the green view index results saved in txt to Shapefile
 # considering the facts many people are more comfortable with shapefile and GIS
-# Copyright(C) Xiaojiang Li, Ian Seiferling, Marwa Abdulhai, Senseable City Lab, MIT
+# Copyright(C) Xiaojiang Li, Ian Seiferling, Marwa Abdulhai, Senseable
+# City Lab, MIT
 
 
 def Read_GSVinfo_Text(GVI_Res_txt):
@@ -16,7 +17,8 @@ def Read_GSVinfo_Text(GVI_Res_txt):
         GVI_Res_txt: the file name of the GSV information txt file
     '''
 
-    import os,os.path
+    import os
+    import os.path
 
     # empty list to save the GVI result and GSV metadata
     panoIDLst = []
@@ -26,9 +28,10 @@ def Read_GSVinfo_Text(GVI_Res_txt):
     greenViewLst = []
 
     # read the green view index result txt files
-    lines = open(GVI_Res_txt,"r")
+    lines = open(GVI_Res_txt, "r")
     for line in lines:
-        # check the completeness of each line, each line include attribute of, panoDate, lon, lat,greenView
+        # check the completeness of each line, each line include attribute of,
+        # panoDate, lon, lat,greenView
         if "panoDate" not in line or "greenview" not in line:
             continue
 
@@ -41,7 +44,7 @@ def Read_GSVinfo_Text(GVI_Res_txt):
         greenView = line.split("greenview:")[1]
 
         # check if the greeView data is valid
-        if len(greenView)<2:
+        if len(greenView) < 2:
             continue
 
         elif float(greenView) < 0:
@@ -56,8 +59,7 @@ def Read_GSVinfo_Text(GVI_Res_txt):
             greenViewLst.append(greenView)
     lines.close()
 
-    return panoIDLst,panoDateLst,panoLonLst,panoLatLst,greenViewLst
-
+    return panoIDLst, panoDateLst, panoLonLst, panoLatLst, greenViewLst
 
 
 # read the green view index files into list, the input can be file or folder
@@ -76,7 +78,8 @@ def Read_GVI_res(GVI_Res):
         last modified by Xiaojiang Li, March 27, 2018
         '''
 
-    import os,os.path
+    import os
+    import os.path
 
     # empty list to save the GVI result and GSV metadata
     panoIDLst = []
@@ -84,7 +87,6 @@ def Read_GVI_res(GVI_Res):
     panoLonLst = []
     panoLatLst = []
     greenViewLst = []
-
 
     # if the input gvi result is a folder
     if os.path.isdir(GVI_Res):
@@ -95,10 +97,11 @@ def Read_GVI_res(GVI_Res):
             if not txtfile.endswith('.txt'):
                 continue
 
-            txtfilename = os.path.join(GVI_Res,txtfile)
+            txtfilename = os.path.join(GVI_Res, txtfile)
 
             # call the function to read txt file to a list
-            [panoIDLst_tem,panoDateLst_tem,panoLonLst_tem,panoLatLst_tem,greenViewLst_tem] = Read_GSVinfo_Text(txtfilename)
+            [panoIDLst_tem, panoDateLst_tem, panoLonLst_tem, panoLatLst_tem,
+                greenViewLst_tem] = Read_GSVinfo_Text(txtfilename)
 
             panoIDLst = panoIDLst + panoIDLst_tem
             panoDateLst = panoDateLst + panoDateLst_tem
@@ -106,24 +109,28 @@ def Read_GVI_res(GVI_Res):
             panoLatLst = panoLatLst + panoLatLst_tem
             greenViewLst = greenViewLst + greenViewLst_tem
 
-    else: #for single txt file
-        [panoIDLst_tem,panoDateLst_tem,panoLonLst_tem,panoLatLst_tem,greenViewLst_tem] = Read_GSVinfo_Text(txtfilename)
+    else:  # for single txt file
+        [panoIDLst_tem, panoDateLst_tem, panoLonLst_tem, panoLatLst_tem,
+            greenViewLst_tem] = Read_GSVinfo_Text(txtfilename)
+
+    return panoIDLst, panoDateLst, panoLonLst, panoLatLst, greenViewLst
 
 
-    return panoIDLst,panoDateLst,panoLonLst,panoLatLst,greenViewLst
-
-
-
-
-def CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList,greenViewList,lyrname):
-
+def CreatePointFeature_ogr(
+        outputShapefile,
+        LonLst,
+        LatLst,
+        panoIDlist,
+        panoDateList,
+        greenViewList,
+        lyrname):
     """
     Create a shapefile based on the template of inputShapefile
     This function will delete existing outpuShapefile and create a new shapefile containing points with
     panoID, panoDate, and green view as respective fields.
 
     Parameters:
-    outputShapefile: the file path of the output shapefile name, example 'd:\greenview.shp'
+    outputShapefile: the file path of the output shapefile name, example 'd:\\greenview.shp'
       LonLst: the longitude list
       LatLst: the latitude list
       panoIDlist: the panorama id list
@@ -153,28 +160,28 @@ def CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList
     outLayer = data_source.CreateLayer(lyrname, targetSpatialRef, ogr.wkbPoint)
     numPnt = len(LonLst)
 
-    print('the number of points is:',numPnt)
+    print('the number of points is:', numPnt)
 
     if numPnt > 0:
         # create a field
         idField = ogr.FieldDefn('PntNum', ogr.OFTInteger)
         panoID_Field = ogr.FieldDefn('panoID', ogr.OFTString)
         panoDate_Field = ogr.FieldDefn('panoDate', ogr.OFTString)
-        greenView_Field = ogr.FieldDefn('greenView',ogr.OFTReal)
+        greenView_Field = ogr.FieldDefn('greenView', ogr.OFTReal)
         outLayer.CreateField(idField)
         outLayer.CreateField(panoID_Field)
         outLayer.CreateField(panoDate_Field)
         outLayer.CreateField(greenView_Field)
 
         for idx in range(numPnt):
-            #create point geometry
+            # create point geometry
             point = ogr.Geometry(ogr.wkbPoint)
 
             # in case of the returned panoLon and PanoLat are invalid
             if len(LonLst[idx]) < 3:
                 continue
 
-            point.AddPoint(float(LonLst[idx]),float(LatLst[idx]))
+            point.AddPoint(float(LonLst[idx]), float(LatLst[idx]))
 
             # Create the feature and set values
             featureDefn = outLayer.GetLayerDefn()
@@ -182,12 +189,12 @@ def CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList
             outFeature.SetGeometry(point)
             outFeature.SetField('PntNum', idx)
             outFeature.SetField('panoID', panoIDlist[idx])
-            outFeature.SetField('panoDate',panoDateList[idx])
+            outFeature.SetField('panoDate', panoDateList[idx])
 
             if len(greenViewList) == 0:
-                outFeature.SetField('greenView',-999)
+                outFeature.SetField('greenView', -999)
             else:
-                outFeature.SetField('greenView',float(greenViewList[idx]))
+                outFeature.SetField('greenView', float(greenViewList[idx]))
 
             outLayer.CreateFeature(outFeature)
             outFeature.Destroy()
@@ -198,9 +205,7 @@ def CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList
         print('You created a empty shapefile')
 
 
-
-
-## ----------------- Main function ------------------------
+# ----------------- Main function ------------------------
 if __name__ == "__main__":
     import os
     import config
@@ -211,9 +216,17 @@ if __name__ == "__main__":
     inputGVIres = os.path.join(root, config.GVIfile['data'])
     outputShapefile = os.path.join(root, config.GVIfile['shapefile'])
     lyrname = 'greenView'
-    [panoIDlist,panoDateList,LonLst,LatLst,greenViewList] = Read_GVI_res(inputGVIres)
-    print ('The length of the panoIDList is:', len(panoIDlist))
+    [panoIDlist, panoDateList, LonLst, LatLst,
+        greenViewList] = Read_GVI_res(inputGVIres)
+    print('The length of the panoIDList is:', len(panoIDlist))
 
-    CreatePointFeature_ogr(outputShapefile,LonLst,LatLst,panoIDlist,panoDateList,greenViewList,lyrname)
+    CreatePointFeature_ogr(
+        outputShapefile,
+        LonLst,
+        LatLst,
+        panoIDlist,
+        panoDateList,
+        greenViewList,
+        lyrname)
 
     print('Done!!!')
