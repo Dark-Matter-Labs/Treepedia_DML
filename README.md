@@ -1,14 +1,14 @@
 # DML
 
-This projects intent is to use the TreePedia methodology for the city of Glasgow. 
+This repository is part on an exploratory project for Trees as Infrastructure, or TreesAI with the intention to use the TreePedia methodology for the city of Glasgow.
+A version of the results can be found on this [interactive map](https://api.mapbox.com/styles/v1/axeln78/ckq9lilv206hb17piyvfttnl9.html?fresh=true&title=view&access_token=pk.eyJ1IjoiYXhlbG43OCIsImEiOiJja3A2eWd6eW4yOTB6MnZtd2dlZTl0b3I5In0.3_LCJxYIa8P4K-m2Jsyp5Q)
 
 Most of the original code has been updated to work in python 3.X based on the previous work of https://github.com/y26805/Treepedia_Public
+Additional features have been added to clean and simplify the overall codebase.
 
 ## Google Street View Keys
 
-A functioning Google Cloud Services key is needed to retreive the Google Street View images. Therefore, make sure you have a working account with a billings account associated with the 'google street view API' enabled.
-Please make sure that the keys that you are using are and stay private. A `keys.txt` file is created for that purpose. 
-
+A functioning Google Cloud Services key is needed to retreive the Google Street View images. Therefore, make sure you have a working account with a billings account associated with the 'google street view API' enabled. Please make sure that the keys that you are using are and stay private.
 
 ## Dependencies
 
@@ -67,9 +67,9 @@ With the street network and boundary shapefile for your city as input, a shapefi
 Note that spatial files must be in the projected WGS84 system.
 
 Example:
-You can just run the code of "createPoints.py" [here](https://github.com/ianseifs/Treepedia_Public/blob/master/Treepedia/createPoints.py)
+You can just run the code of "1.createPoints.py" 
 
-python createPoints.py
+python 1.createPoints.py
 
 In the example, I use Cambridge as example. At the buttom of the code, you can specify the input shapefile of the street map, the minimum distance for sampling, and the number of the output shapefile for your cities.
 
@@ -84,9 +84,9 @@ With the shapefile as input, metadata containing the panoID, panoDate, latitude,
 </p>
 
 Example:
-You can just run the code of "metadataCollector.py" [here](https://github.com/ianseifs/Treepedia_Public/blob/master/Treepedia/metadataCollector.py)
+You can just run the code of "2.metadataCollector.py"
 
-python metadataCollector.py
+python 2.metadataCollector.py
 
 The input of this code is created sample site shapefile. In the example, I use Cambridge20m.shp in the sample-spatialdata folder. You can generate your own sample sites based on the createPnt.py. At the buttom of the code, you can specify different sample site file. The batch size is 1000, which means the code will save metadata of every 1000 point to a txt file.
 
@@ -101,15 +101,15 @@ Using Otsu's method and the pymeanshift package, the Green View Index is compute
 
 Example:
 
-You can just run the code of "GreenView_Calculate.py" [here](https://github.com/ianseifs/Treepedia_Public/blob/master/Treepedia/GreenView_Calculate.py)
+You can just run the code of "3.GreenView_Calculate.py"
 
-python GreenView_Calculate.py
+python 3.GreenView_Calculate.py
 
 The input of this code is the collected metadata of GSV. By reading the metadat, this code will collect GSV images and segmente the greenery, and calculate the green view index. Considering those GSV images captured in winter are leafless, thiwh are not suitable for the analysis. You also need to specific the green season, for example, in Cambridge, the green months are May, June, July, August, and September.
 
 You can open several process to run this code simutaniously, because the output will be saved as txt files in folder. If the output txt file is already there, then the code will move to the next metadata txt file and generate the GVI for next 1000 points.
 
-After finishing the computing, you can run the code of "Greenview2Shp.py" [here](https://github.com/ianseifs/Treepedia_Public/blob/master/Treepedia/Greenview2Shp.py), and save the result as shapefile, if you are more comfortable with shapefile.
+After finishing the computing, you can run the code of "4.Greenview2Shp.py", and save the result as shapefile, if you are more comfortable with shapefile.
 
 
 # Dependencies
@@ -123,8 +123,8 @@ After finishing the computing, you can run the code of "Greenview2Shp.py" [here]
   * Python (2.7)
 
 # Contributors
-Project Co-Leads: Xiaojiang Li and Ian Seiferling
+Dark Matter Laboratories coding crew and Axel Nilsson
 
-Researchers: Bill Cai, Marwa Abdulhai
-
-Website and Visualization: Wonyoung So
+Original project from MIT:
+  Project Co-Leads: Xiaojiang Li and Ian Seiferling
+  Researchers: Bill Cai, Marwa Abdulhai
