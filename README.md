@@ -123,7 +123,7 @@ After finishing the computing, you can run the code of "4.Greenview2Shp.py", and
   * Python (2.7)
 
 # Contributors
-Dark Matter Laboratories coding crew and Axel Nilsson
+Axel Nilsson in the Dark Matter Laboratories coding crew
 
 Original project from MIT:
   Project Co-Leads: Xiaojiang Li and Ian Seiferling
